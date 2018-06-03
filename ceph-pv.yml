@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: gitlab-cephfs
+spec:
+  capacity:
+    storage: 2000Gi
+  accessModes:
+    - ReadWriteMany
+  #fsType: ext4
+  cephfs:
+    monitors:
+      - "ceph1.node.com.cn:6789"
+      - "ceph2.node.com.cn:6789"
+      - "ceph3.node.com.cn:6789"
+    path: /data
+    user: gitlab
+    secretRef:
+      name: ceph-gitlab-secret

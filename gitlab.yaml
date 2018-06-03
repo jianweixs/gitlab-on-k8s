@@ -1,0 +1,248 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: gitlab-yf
+  namespace: default-yf
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: gitlab-yf
+    spec:
+      hostNetwork: true
+      containers:
+      - name: gitlab
+        image: sambn/gitlab:9.1.3
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: GITLAB_TIMEZONE
+          value: Beijing
+        - name: GITLAB_REGISTRY_HOST
+          value: "gitlab.work.com.cn"
+        - name: DB_ADAPTER
+          value: mysql2
+        - name: DB_HOST
+          value: "$DB_HOST"
+        - name: DB_NAME
+          value: "gitlabhq_production"
+        - name: DB_USER
+          value: "dpool_gitlab"
+        - name: DB_PASS
+          value: "$DB_PASS"
+        - name: DB_PORT
+          value: "3306"
+        - name: DB_POOL
+          value: "10"
+        - name: REDIS_HOST
+          value: "$REDIS_IP"
+        - name: REDIS_PORT
+          value: "$REDIS_PORT"
+        - name: GITLAB_SSH_PORT
+          value: "10022"
+        - name: GITLAB_SECRETS_DB_KEY_BASE
+          value: Lo5rpx9PVQP6fTrCvAvSwY//pkHYsyz4iH9jPQCAZos=
+        - name: GITLAB_SECRETS_SECRET_KEY_BASE
+          value: Lo5rpx9PVQP6fTrCvAvSwY//pkHYsyz4iH9jPQCAZos=
+        - name: GITLAB_SECRETS_OTP_KEY_BASE
+          value: Lo5rpx9PVQP6fTrCvAvSwY//pkHYsyz4iH9jPQCAZos=
+        - name: GITLAB_PAGES_ENABLED
+          value: "true"
+        - name: GITLAB_PAGES_DOMAIN
+          value: "gitlab.work.com.cn"
+        - name: GITLAB_HOST
+          value: "gitlab.work.com.cn"
+
+###################CONFIGURE SMTP EMAIL#############################
+
+        - name: DEBUG
+          value: "true"
+        - name: SMTP_ENABLED
+          value: "true"
+        - name: SMTP_DOMAIN
+          value: "mail.163.com"
+        - name: SMTP_HOST
+          value: "mail.163.com"
+        - name: SMTP_PORT
+          value: "587"
+        - name: SMTP_USER
+          value: "$MAIL_USR"
+        - name: SMTP_PASS
+          value: "$PASSWORD"
+        - name: SMTP_STARTTLS
+          value: "true"
+        - name: SMTP_AUTHENTICATION
+          value: "login"
+        - name: SMTP_TLS
+          value: "false"
+        - name: SMTP_OPENSSL_VERIFY_MODE
+          value: "none"
+        - name: GITLAB_ROOT_EMAIL
+          value: "$MAIN_USER"
+        - name: GITLAB_EMAIL
+          value: "$MAIL_USER"
+        - name: GITLAB_EMAIL_DISPLAY_NAME
+          value: "gitlab"
+        - name: GITLAB_EMAIL_SUBJECT_SUFFIX
+          value: "gitlab_auto"
+        - name: GITLAB_EMAIL_REPLY_TO
+          value: "noreply@example.com"
+        - name: GITLAB_EMAIL_ENABLED
+          value: "true"
+        - name: GITLAB_REPOS_DIR
+          value: /home/git/data/repositories
+        - name: GITLAB_BACKUP_DIR
+          value: /home/git/data/backups
+        - name: GITLAB_BUILDS_DIR
+          value: /home/git/data/builds
+        - name: GITLAB_SHARED_DIR
+          value: /home/git/data/shared
+        - name: GITLAB_MONITORING_SIDEKIQ_EXPORTER_ENABLED
+          value: "true"
+        - name: GITLAB_MONITORING_UNICORN_SAMPLER_INTERVAL
+          value: "10"
+        - name: GITLAB_MONITORING_SIDEKIQ_EXPORTER_ADDRESS
+          value: "0.0.0.0"
+        - name: GITLAB_MONITORING_SIDEKIQ_EXPORTER_PORT
+          value: "3807"
+
+##########################################################
+#设置默认的项目限制。默认为100
+        - name: GITLAB_PROJECTS_LIMIT
+          value: "1000"
+#备份文件的权限
+        - name: GITLAB_BACKUP_ARCHIVE_PERMISSIONS
+          value: "600"
+#启用或禁用为用户创建组的能力.默认为true.
+        - name: GITLAB_CREATE_GROUP
+          value: "true"
+#如果设置问题，功能将会被默认为新项目启用。默认为true
+        - name: GITLAB_PROJECTS_ISSUES
+          value: "true"
+#如果设置的合并请求功能将会被默认为新项目启用。默认为true.
+        - name: GITLAB_PROJECTS_MERGE_REQUESTS
+          value: "true"
+#如果设置维基的功能将会被默认为新项目启用。默认为true.
+        - name: GITLAB_PROJECTS_WIKI
+          value: "true"
+#如果设置片段功能将会被默认为新项目启用。默认为false 。
+        - name: GITLAB_PROJECTS_SNIPPETS
+          value: "false"
+#是否启用bulid功能，默认为ture
+        - name: GITLAB_PROJECTS_BUILDS
+          value: "true"
+#设置container_registry功能将会被默认为新项目启用。默认为true.
+        - name: GITLAB_PROJECTS_CONTAINER_REGISTRY
+          value: "true"
+#启用/禁用的Git LFS(Large File Storge)支持。 默认为true 。
+        - name: GITLAB_LFS_ENABLED
+          value: "false"
+##目录存储LFS。默认为$GITLAB_SHARED_DIR/lfs-objects
+#        - name: GITLAB_LFS_OBJECTS_DIR
+#          value: /home/git/data/shared/lfs-objects
+#将cron设置为自动备份。 可用的值为 disable, daily, weekly or monthly，默认为disable.
+        - name: NGINX_WORKERS
+          value: "10"
+        - name: UNICORN_WORKERS
+          value: "10"
+        - name: UNICORN_TIMEOUT
+          value: "60"
+        - name: SIDEKIQ_CONCURRENCY
+          value: "25"
+        - name: GITLAB_MAX_OBJECT_SIZE
+          value: "41943040"
+        - name: SIDEKIQ_CONCURRENCY
+          value: "50"
+        - name: SIDEKIQ_SHUTDOWN_TIMEOUT
+          value: "2"
+        - name: SIDEKIQ_MEMORY_KILLER_MAX_RSS
+          value: "1000000"
+#######################gitlab 备份 #################################
+        - name: GITLAB_BACKUP_SCHEDULE
+          value: daily
+#设置自动备份的时间。默认为04:00。
+        - name: GITLAB_BACKUP_TIME
+          value: "01:00"
+
+#启用或禁用构建失败的电子邮件通知。默认为true，默认为disable.
+        - name: GITLAB_NOTIFY_ON_BROKEN_BUILDS
+          value: "true"
+        - name: GITLAB_NOTIFY_PUSHER
+          value: "false"
+#        - name: GITLAB_GRAVATAR_ENABLED
+#          value: "true"
+#        - name: GITLAB_GRAVATAR_HTTP_URL
+#          value: "http://www.gravatar.com/avatar/%{hash}?s=%{size}&d=identicon"
+###########################LDAP###############################
+#启用LDAP。默认为false
+        - name: LDAP_ENABLED
+          value: "true"
+#LDAP_LABEL要在LDAP服务器的登录选项卡上显示的标签。默认为"LDAP"
+        - name: LDAP_LABEL
+          value: "LDAP"
+#LDAP_HOST LDAP主机
+        - name: LDAP_HOST
+          value: "$LDAP_HOST"
+#LDAP_PORT LDAP端口。默认为389
+        - name: LDAP_PORT
+          value: "389"
+#LDAP_UID LDAP UID。默认为sAMAccountName
+        - name: LDAP_UID
+          value: "sAMAccountName"
+#LDAP_METHOD LDAP方法，可能的值为ssl，tls和plain。默认为plain
+        - name: LDAP_METHOD
+          value: "plain"
+#LDAP_BIND_DN没有默认。
+        - name: LDAP_BIND_DN
+          value: "CN=addapdev,OU=ldap,OU=adminaccount,DC=,DC=,DC=com,DC=cn"
+#LDAP_PASS LDAP密码
+        - name: LDAP_PASS
+          value: "$LDAP_PASSWORD"
+#LDAP_TIMEOUT LDAP查询的超时（以秒为单位）。默认为10。
+        - name: LDAP_TIMEOUT
+          value: "10"
+#LDAP_BASE可以搜索用户的基地。没有默认值。
+        - name: LDAP_BASE
+          value: "OU=,DC=,DC=,DC=com,DC=cn"
+#LDAP_ACTIVE_DIRECTORY指定LDAP服务器是否为Active Directory LDAP服务器。如果您的LDAP服务器不是AD，请将其设置为false。默认为true，
+        - name: LDAP_ACTIVE_DIRECTORY
+          value: "true"
+#LDAP_ALLOW_USERNAME_OR_EMAIL_LOGIN如果启用，GitLab会忽略用户在登录时提交的LDAP用户名中的第一个“@”后面的所有内容。如果LDAP_UID为userPrincipalName，则默认为false，否则为true。
+        - name: LDAP_ALLOW_USERNAME_OR_EMAIL_LOGIN
+          value: "false"
+        - name: OAUTH_AUTO_LINK_LDAP_USER
+          value: "true"
+#LDAP_BLOCK_AUTO_CREATED_USERS锁定这些用户，直到被管理员清除。默认为false。
+#LDAP_USER_FILTER过滤LDAP用户。没有默认值。
+################################CONFIG LDAP END###################################
+        ports:
+        - name: http
+          containerPort: 80
+        - name: ssh
+          containerPort: 10022
+        volumeMounts:
+        - mountPath: /home/git/data
+          name: cephfs
+      nodeSelector:
+        IDC: YF
+        ROLES: GITLAB
+
+      volumes:
+      - name: cephfs
+        persistentVolumeClaim:
+           claimName: gitlab-cephfs

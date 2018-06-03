@@ -1,0 +1,11 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: gitlab-cephfs
+  namespace: default
+spec:
+  accessModes:
+      - ReadWriteMany
+  resources:
+      requests:
+        storage: 2000Gi
